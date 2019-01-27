@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/cschwede/s3uploader.svg?branch=master)](https://travis-ci.org/cschwede/s3uploader)
+
 s3uploader
 ==========
 
