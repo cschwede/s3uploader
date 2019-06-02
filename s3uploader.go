@@ -37,7 +37,10 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	} else {
-		upload(filename, bucket, key, pubkey, kbps)
+	        tmpfile := encryptFile(filename, pubkey)
+	        defer os.Remove(tmpfile)
+
+		upload(tmpfile, bucket, key, kbps)
 	}
 }
 
@@ -60,7 +63,7 @@ func getService(bucket string) *s3.S3 {
 	return svc
 }
 
-func upload(filename string, bucket string, key string, pubkey string, kbps int) {
+func upload(filename string, bucket string, key string, kbps int) {
 	svc := getService(bucket)
 
         if objectExists(svc, bucket, key) {
@@ -68,10 +71,7 @@ func upload(filename string, bucket string, key string, pubkey string, kbps int)
                 return
         }
 
-	tmpfile := encryptFile(filename, pubkey)
-	defer os.Remove(tmpfile)
-
-	file, ferr := os.Open(tmpfile)
+	file, ferr := os.Open(filename)
 	checkErr(ferr)
 	defer file.Close()
 
