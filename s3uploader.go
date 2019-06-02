@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"io"
 	"io/ioutil"
@@ -43,7 +44,8 @@ func main() {
 		tmpfile := encryptFile(filename, pubkey)
 		defer os.Remove(tmpfile)
 
-		upload(tmpfile, svc, bucket, key, kbps)
+		err := upload(tmpfile, svc, bucket, key, kbps)
+		checkErr(err)
 	} else {
 		log.Printf("skipped uploading file %s to %s/%s\n", filename, bucket, key)
 	}
@@ -68,7 +70,7 @@ func getService(bucket string) *s3.S3 {
 	return svc
 }
 
-func upload(filename string, svc *s3.S3, bucket string, key string, kbps int) {
+func upload(filename string, svc *s3.S3, bucket string, key string, kbps int) error {
 	file, ferr := os.Open(filename)
 	checkErr(ferr)
 	defer file.Close()
@@ -90,9 +92,10 @@ func upload(filename string, svc *s3.S3, bucket string, key string, kbps int) {
 	checkErr(err)
 	defer response.Body.Close()
 
-	if response.StatusCode == 200 {
-		log.Printf("successfully uploaded file %s to %s/%s\n", filename, bucket, key)
+	if response.StatusCode != 200 {
+		return errors.New(response.Status)
 	}
+	return nil
 }
 
 // encryptFile takes a filename and path to a public key, creates a temporary
