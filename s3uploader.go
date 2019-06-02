@@ -213,3 +213,20 @@ func objectExists(svc *s3.S3, bucket string, key string) bool {
         }
         return false
 }
+
+func getExistingObjects(bucket string) map[string]bool {
+	svc := getService(bucket)
+
+	objs := make(map[string]bool)
+
+	err := svc.ListObjectsPages(&s3.ListObjectsInput{
+		Bucket: aws.String(bucket),
+	}, func(p *s3.ListObjectsOutput, last bool) (shouldContinue bool) {
+		for _, obj := range p.Contents {
+			objs[*obj.Key] = true
+		}
+		return true
+	})
+	checkErr(err)
+	return objs
+}
