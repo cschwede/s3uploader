@@ -86,14 +86,12 @@ func upload(filename string, svc *s3.S3, bucket string, key string, kbps int) {
 	checkErr(err)
 	request.ContentLength = fi.Size()
 
-	begin := time.Now()
 	response, err := http.DefaultClient.Do(request)
 	checkErr(err)
 	defer response.Body.Close()
-	realKbps := float32(fi.Size()/1024) / float32(time.Since(begin)/time.Second)
 
 	if response.StatusCode == 200 {
-		log.Printf("successfully uploaded file %s to %s/%s (%f kbps)\n", filename, bucket, key, realKbps)
+		log.Printf("successfully uploaded file %s to %s/%s\n", filename, bucket, key)
 	}
 }
 
