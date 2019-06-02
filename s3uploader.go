@@ -63,38 +63,39 @@ func getService(bucket string) *s3.S3 {
 func upload(filename string, bucket string, key string, pubkey string, kbps int) {
 	svc := getService(bucket)
 
-        if !objectExists(svc, bucket, key) {
-		tmpfile := encryptFile(filename, pubkey)
-		defer os.Remove(tmpfile)
-
-		file, ferr := os.Open(tmpfile)
-		checkErr(ferr)
-		defer file.Close()
-
-		req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
-			Bucket: aws.String(bucket),
-			Key:    aws.String(key),
-		})
-		url, _ := req.Presign(5 * time.Minute)
-
-		request, _ := http.NewRequest("PUT", url, SlowReader(file, kbps*1024))
-
-		// Need to properly set the content length, otherwise S3 fails
-		fi, err := file.Stat()
-		checkErr(err)
-		request.ContentLength = fi.Size()
-
-		begin := time.Now()
-		response, err := http.DefaultClient.Do(request)
-		checkErr(err)
-		defer response.Body.Close()
-		realKbps := float32(fi.Size()/1024) / float32(time.Since(begin)/time.Second)
-
-		if response.StatusCode == 200 {
-			log.Printf("successfully uploaded file %s to %s/%s (%f kbps)\n", filename, bucket, key, realKbps)
-		}
-	} else {
+        if objectExists(svc, bucket, key) {
 		log.Printf("skipped uploading file %s to %s/%s\n", filename, bucket, key)
+                return
+        }
+
+	tmpfile := encryptFile(filename, pubkey)
+	defer os.Remove(tmpfile)
+
+	file, ferr := os.Open(tmpfile)
+	checkErr(ferr)
+	defer file.Close()
+
+	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	url, _ := req.Presign(5 * time.Minute)
+
+	request, _ := http.NewRequest("PUT", url, SlowReader(file, kbps*1024))
+
+	// Need to properly set the content length, otherwise S3 fails
+	fi, err := file.Stat()
+	checkErr(err)
+	request.ContentLength = fi.Size()
+
+	begin := time.Now()
+	response, err := http.DefaultClient.Do(request)
+	checkErr(err)
+	defer response.Body.Close()
+	realKbps := float32(fi.Size()/1024) / float32(time.Since(begin)/time.Second)
+
+	if response.StatusCode == 200 {
+		log.Printf("successfully uploaded file %s to %s/%s (%f kbps)\n", filename, bucket, key, realKbps)
 	}
 }
 
