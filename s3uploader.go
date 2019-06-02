@@ -36,12 +36,12 @@ func main() {
 	if filename == "" || pubkey == "" {
 		flag.PrintDefaults()
 		os.Exit(1)
-	} else {
-	        tmpfile := encryptFile(filename, pubkey)
-	        defer os.Remove(tmpfile)
-
-		upload(tmpfile, bucket, key, kbps)
 	}
+
+        tmpfile := encryptFile(filename, pubkey)
+	defer os.Remove(tmpfile)
+
+	upload(tmpfile, bucket, key, kbps)
 }
 
 func getService(bucket string) *s3.S3 {
