@@ -207,6 +207,5 @@ func (rdr *SlowReaderType) Read(buffer []byte) (bytesRead int, err error) {
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 }
