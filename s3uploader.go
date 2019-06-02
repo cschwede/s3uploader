@@ -63,10 +63,6 @@ func getService(bucket string) *s3.S3 {
 func upload(filename string, bucket string, key string, pubkey string, kbps int) {
 	svc := getService(bucket)
 
-	file, ferr := os.Open(filename)
-	checkErr(ferr)
-	defer file.Close()
-
         if !objectExists(svc, bucket, key) {
 		tmpfile := encryptFile(filename, pubkey)
 		defer os.Remove(tmpfile)
