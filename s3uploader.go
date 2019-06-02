@@ -67,11 +67,7 @@ func upload(filename string, bucket string, key string, pubkey string, kbps int)
 	checkErr(ferr)
 	defer file.Close()
 
-	resp, _ := svc.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-	})
-	if resp.LastModified == nil {
+        if !objectExists(svc, bucket, key) {
 		tmpfile := encryptFile(filename, pubkey)
 		defer os.Remove(tmpfile)
 
@@ -208,4 +204,15 @@ func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func objectExists(svc *s3.S3, bucket string, key string) bool {
+	resp, _ := svc.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	if resp.LastModified != nil {
+                return true
+        }
+        return false
 }
