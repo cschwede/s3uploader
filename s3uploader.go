@@ -41,9 +41,27 @@ func main() {
 	}
 }
 
-func upload(filename string, bucket string, key string, pubkey string, kbps int) {
-	sess, _ := session.NewSession()
+func getService(bucket string) *s3.S3 {
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	}))
 	svc := s3.New(sess)
+
+	resp, err := svc.GetBucketLocation(&s3.GetBucketLocationInput{
+		Bucket: &bucket,
+	})
+	checkErr(err)
+
+	sess = session.Must(session.NewSession(&aws.Config{
+		Region: resp.LocationConstraint,
+	}))
+	svc = s3.New(sess)
+
+	return svc
+}
+
+func upload(filename string, bucket string, key string, pubkey string, kbps int) {
+	svc := getService(bucket)
 
 	file, ferr := os.Open(filename)
 	checkErr(ferr)
