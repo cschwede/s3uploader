@@ -3,7 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"math/rand"
-    "os"
+	"os"
 	"testing"
 	"time"
 )
@@ -16,7 +16,7 @@ func TestSlowReader(t *testing.T) {
 	tmpfile, err := ioutil.TempFile("", "s3uploader_test")
 	checkErr(err)
 	defer tmpfile.Close()
-    defer os.Remove(tmpfile.Name())
+	defer os.Remove(tmpfile.Name())
 
 	data := make([]byte, 1000)
 	rand.Read(data)

@@ -38,7 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
-        tmpfile := encryptFile(filename, pubkey)
+	tmpfile := encryptFile(filename, pubkey)
 	defer os.Remove(tmpfile)
 
 	upload(tmpfile, bucket, key, kbps)
@@ -68,8 +68,8 @@ func upload(filename string, bucket string, key string, kbps int) {
 
         if objectExists(svc, bucket, key) {
 		log.Printf("skipped uploading file %s to %s/%s\n", filename, bucket, key)
-                return
-        }
+		return
+	}
 
 	file, ferr := os.Open(filename)
 	checkErr(ferr)
@@ -209,9 +209,9 @@ func objectExists(svc *s3.S3, bucket string, key string) bool {
 		Key:    aws.String(key),
 	})
 	if resp.LastModified != nil {
-                return true
-        }
-        return false
+		return true
+	}
+	return false
 }
 
 func getExistingObjects(bucket string) map[string]bool {
